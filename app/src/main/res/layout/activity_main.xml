@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity"
+    android:background="@drawable/back">
+    <Button
+        android:id="@+id/btn_plot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn_circle"
+        android:gravity="center"/>
+    <EditText
+        android:id="@+id/et_rho"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="rho"
+        android:background="@drawable/editsharp"/>
+    <EditText
+        android:id="@+id/et_beta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="beta"
+        android:background="@drawable/editsharp"/>
+    <EditText
+        android:id="@+id/et_lambda"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="lambda"
+        android:background="@drawable/editsharp"/>
+    <EditText
+        android:id="@+id/et_blambda"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="blambda"
+        android:background="@drawable/editsharp"/>
+    <EditText
+        android:id="@+id/et_bgtime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="begin time"
+        android:background="@drawable/editsharp"/>
+    <EditText
+        android:id="@+id/et_step"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="time step"
+        android:background="@drawable/editsharp"/>
+    <EditText
+        android:id="@+id/et_endtime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="end time"
+        android:background="@drawable/editsharp"/>
+</LinearLayout>
