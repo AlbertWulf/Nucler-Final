@@ -32,6 +32,9 @@ public class Plot extends AppCompatActivity {
     private double c0;
     private double temp;
     private List<Double> nt = new ArrayList<>();
+    private String rho;
+    private String mt;
+    private int arrsize;
     //private double[] nt = new double[10000];
 
     @Override
@@ -40,31 +43,44 @@ public class Plot extends AppCompatActivity {
         setContentView(R.layout.activity_plot);
         lineChart = (LineChart) findViewById(R.id.lineChart);
         Intent intent = this.getIntent();
+        rho = intent.getStringExtra("str_rho");
+        Log.i("Plot",rho);
        double[] arrdata = new double[7];
        Bundle b = intent.getExtras();
-       arrdata = b.getDoubleArray("arrdata");
-        for(int x=0;x<7;x++){
-            Log.i("Plot",""+arrdata[x]);//必须一个个的读取
-        }
+       arrsize = intent.getIntExtra("len",0);
+      // arrdata = b.getDoubleArray("arrdata");
+        double[] ntt = new double[arrsize];
+               ntt = b.getDoubleArray("nn");
+               A11 = ntt[2];
+               mt = String.valueOf(A11);
+               //Log.i("Plot",mt);
+               mt = String.valueOf(ntt[3]);
+               //Log.i("Plot",mt);
+       // for(int x=0;x<7;x++){
+         //   Log.i("Plot",""+arrdata[x]);//必须一个个的读取
+        //}
         //length = Math.floor(3/2);
-        A11 = (arrdata[0]-arrdata[1])/arrdata[3];
-        A12 = arrdata[2];
-        n0 = 1;
-        c0 = arrdata[1]/(arrdata[2]*arrdata[3]);
-        length = (int) Math.ceil((arrdata[6]-arrdata[4])/arrdata[5]);
-        for (int ii=0;ii < length;ii++) {
-            nt.add(Math.exp((A11*n0+A12*c0)*ii));
+        //A11 = (arrdata[0]-arrdata[1])/arrdata[3];
+        //A12 = arrdata[2];
+        //n0 = 1;
+        //c0 = arrdata[1]/(arrdata[2]*arrdata[3]);
+        //length = (int) Math.ceil((arrdata[6]-arrdata[4])/arrdata[5]);
+        //for (int ii=0;ii < length;ii++) {
+         //   nt.add(Math.exp((A11*n0+A12*c0)*ii/length*arrdata[6]));
             //nt.add(0.1*ii);
-            Log.i("Plot","" + ii*Math.exp(A11*n0+A12*c0));
+          //  Log.i("Plot","" + ii/length*Math.exp(A11*n0+A12*c0));
+        //}
+        for(int ii = 0;ii<arrsize;ii++) {
+            nt.add(ntt[ii]);
         }
 
-        for (int kk = 0;kk < nt.size();kk++) {
-            Log.i("Plot","" + nt.get(kk));
+        //for (int kk = 0;kk < nt.size();kk++) {
+          //  Log.i("Plot","" + nt.get(kk));
 
-        }
+        //}
 
 
-        Log.i("Plot" ," "+nt.size());
+        //Log.i("Plot" ," "+nt.size());
         //dd = in
         // tent.getStringExtra("extra_data");
         //Toast.makeText(Plot.this,dd,Toast.LENGTH_SHORT).show();
@@ -78,7 +94,7 @@ public class Plot extends AppCompatActivity {
             yDataList.add(new Entry(jj,(float) temp));
         }
 
-        LineDataSet dataSet = new LineDataSet(yDataList,"Leibie");
+        LineDataSet dataSet = new LineDataSet(yDataList,"Netron Flux");
         dataSet.setColor(Color.parseColor("#ff5500"));
         dataSet.setCircleColor(Color.parseColor("#ff5500"));
         dataSet.setLineWidth(1f);
