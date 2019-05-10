@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -30,6 +31,7 @@ public class Plot extends AppCompatActivity {
     private double A22;
     private double n0;
     private double c0;
+    private double st;//记录传参步长
     private double temp;
     private List<Double> nt = new ArrayList<>();
     private String rho;
@@ -44,17 +46,18 @@ public class Plot extends AppCompatActivity {
         lineChart = (LineChart) findViewById(R.id.lineChart);
         Intent intent = this.getIntent();
         rho = intent.getStringExtra("str_rho");
+        st = intent.getDoubleExtra("step",1);
         Log.i("Plot",rho);
-       double[] arrdata = new double[7];
-       Bundle b = intent.getExtras();
-       arrsize = intent.getIntExtra("len",0);
+        double[] arrdata = new double[7];
+        Bundle b = intent.getExtras();
+        arrsize = intent.getIntExtra("len",0);
       // arrdata = b.getDoubleArray("arrdata");
         double[] ntt = new double[arrsize];
-               ntt = b.getDoubleArray("nn");
-               A11 = ntt[2];
-               mt = String.valueOf(A11);
+        ntt = b.getDoubleArray("nn");
+        A11 = ntt[2];
+        mt = String.valueOf(A11);
                //Log.i("Plot",mt);
-               mt = String.valueOf(ntt[3]);
+        mt = String.valueOf(ntt[3]);
                //Log.i("Plot",mt);
        // for(int x=0;x<7;x++){
          //   Log.i("Plot",""+arrdata[x]);//必须一个个的读取
@@ -87,18 +90,24 @@ public class Plot extends AppCompatActivity {
        // List<String> xDataList = new ArrayList<>();// x轴数据源
         List<Entry> yDataList = new ArrayList<>();// y轴数据数据源
 //给上面的X、Y轴数据源做假数据测试
+        float xvalues = 0;
         for (int jj = 0;jj<nt.size();jj++) {
             //yDataList.add(new Entry(jj, new Random().nextInt(300)));
             //yDataList.add(new Entry(jj,(float) 2.5));
             temp = nt.get(jj);
-            yDataList.add(new Entry(jj,(float) temp));
+            xvalues = xvalues+(float) st;
+         //   xDataList.add(jj/1000+"");
+            yDataList.add(new Entry(xvalues,(float) temp));
         }
 
         LineDataSet dataSet = new LineDataSet(yDataList,"Netron Flux");
         dataSet.setColor(Color.parseColor("#ff5500"));
         dataSet.setCircleColor(Color.parseColor("#ff5500"));
         dataSet.setLineWidth(1f);
-
+        //设置运行曲线平滑
+        dataSet.setCubicIntensity(0.6f);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        //
         XAxis xAxis = lineChart.getXAxis();
         YAxis leftyAxis = lineChart.getAxisLeft();
         YAxis rightyAxis = lineChart.getAxisRight();
@@ -110,6 +119,7 @@ public class Plot extends AppCompatActivity {
 
 
         LineData lineData = new LineData(dataSet);
+
         lineChart.setData(lineData);
         lineChart.invalidate();
 
@@ -130,5 +140,7 @@ public class Plot extends AppCompatActivity {
 
 
     }
+
+
 
 }

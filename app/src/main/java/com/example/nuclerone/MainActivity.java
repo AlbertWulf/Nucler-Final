@@ -1,14 +1,26 @@
 package com.example.nuclerone;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +30,9 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import Jama.Matrix;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
     private String etStr;
@@ -60,12 +75,42 @@ public class MainActivity extends AppCompatActivity {
     private List<Double> n = new ArrayList<>();
     ScriptEngineManager manager = new ScriptEngineManager();
     ScriptEngine engine = manager.getEngineByName("rhino");
-
-
-
+    private DrawerLayout mDrawerLayout;
+    //以下设置U235的缓发中子参数
+    public String U_3rho = "0.003";
+    public String U_3beta = "0.000266,0.001491,0.001316,0.002849,0.000896,0.000182";
+    public String U_3Lambda = "0.0127,0.0317,0.115,0.311,1.40,3.87";
+    public String U_3Blambda = "0.00002";
+    //U235 END
+    //以下设置U238的缓发中子参数
+    public String U_8rho = "0.003";
+    public String U_8beta = "0.000266,0.001491,0.001316,0.002849,0.000896,0.000182";
+    public String U_8Lambda = "0.0127,0.0317,0.115,0.311,1.40,3.87";
+    public String U_8Blambda = "0.00002";
+    //U238END
+    //以下设置Pu239的缓发中子参数
+    public String P_9rho = "0.003";
+    public String P_9beta = "0.000266,0.001491,0.001316,0.002849,0.000896,0.000182";
+    public String P_9Lambda = "0.0127,0.0317,0.115,0.311,1.40,3.87";
+    public String P_9Blambda = "0.00002";
+    //Pu239END
+    private ImageView bingPicImg;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //(修)修改顶部状态栏的融合
+        if (Build.VERSION.SDK_INT >= 21) {
+
+            View decorView = getWindow().getDecorView();
+
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+
+        }
+        //(修)END
         setContentView(R.layout.activity_main);
         Button btnplot = findViewById(R.id.btn_plot);
         etbeta = findViewById(R.id.et_beta);
@@ -75,7 +120,65 @@ public class MainActivity extends AppCompatActivity {
         etbgtime = findViewById(R.id.et_bgtime);
         etstep = findViewById(R.id.et_step);
         etendtime = findViewById(R.id.et_endtime);
+        //(BING)以下记载必应每日一图作为背景
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        bingPicImg = findViewById(R.id.bin_pic_img);
+        String bingPic = prefs.getString("bing_pic",null);
+        if (bingPic != null) {
+            Glide.with(this).load(bingPic).into(bingPicImg);
+        } else {
+            loadBingPic();
+        }
+        //(BING)END
+        //（侧）以下处理侧边栏的点击事件
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navView = findViewById(R.id.nav_view);
+        navView.setCheckedItem(R.id.nav_call);
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+               switch (item.getItemId()){
+                   case R.id.nav_call:
+                     etrho.setText(U_3rho);
+                     etbeta.setText(U_3beta);
+                     etlambda.setText(U_3Lambda);
+                     etblambda.setText(U_3Blambda);
+                     mDrawerLayout.closeDrawers();
+                     break;
+               }
+               switch (item.getItemId()){
+                   case R.id.nav_friends:
+                       etrho.setText(U_8rho);
+                       etbeta.setText(U_8beta);
+                       etlambda.setText(U_8Lambda);
+                       etblambda.setText(U_8Blambda);
+                       mDrawerLayout.closeDrawers();
+                       break;
+               }
+               switch (item.getItemId()){
+                   case R.id.nav_location:
+                       etrho.setText(P_9rho);
+                       etbeta.setText(P_9beta);
+                       etlambda.setText(P_9Lambda);
+                       etblambda.setText(P_9Blambda);
+                       mDrawerLayout.closeDrawers();
+                       break;
+               }
+                switch (item.getItemId()){
+                    case R.id.nav_mail:
+                        mDrawerLayout.closeDrawers();
+                        break;
+                }
+                switch (item.getItemId()){
+                    case R.id.nav_task:{
+                        mDrawerLayout.closeDrawers();
+                    }
+                }
 
+                return true;
+            }
+        });
+        //(侧）END
 
        // final double[][] array = {{1.,2.,3},{4.,5.,6.},{7.,8.,10.}};
 
@@ -112,6 +215,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 expr = etrho.getText().toString();
+                //for two lines below ,it's disturbing when users want to input sin or pi because java needs Math.sin and Math.PI,so
+                //replace here and you just need to input sin and pi
                 expr = expr.replaceAll("sin","Math.sin");
                 expr = expr.replaceAll("pi","Math.PI");
                 double mk = 0;//replace tt
@@ -233,15 +338,16 @@ public class MainActivity extends AppCompatActivity {
                 for(int mm = 0;mm<size;mm++) {
                     db[mm] = doubnt[mm].doubleValue();
                 }
-                Log.i("HHD",String.valueOf(doubnt[2]));
-                Log.i("HHD",String.valueOf(doubnt[3]));
-                Log.i("Size",String.valueOf(size));
+               // Log.i("HHD",String.valueOf(doubnt[2]));
+                //Log.i("HHD",String.valueOf(doubnt[3]));
+                //Log.i("Size",String.valueOf(size));
                 Intent intent = new Intent(MainActivity.this,Plot.class);
                 //b.putDoubleArray("nt",arrdata);
                 b.putDoubleArray("nn",db);
                 intent.putExtras(b);
                 intent.putExtra("len",size);
                 intent.putExtra("str_rho",etStr);
+                intent.putExtra("step",arrdata[5]);
                 //intent.putExtra("key",arrdata);
                 startActivity(intent);
 
@@ -249,6 +355,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+    /**
+     * 加载必应每日一图
+     */
+    private void loadBingPic() {
+        String requestBingPic = "http://guolin.tech/api/bing_pic";
+        HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String bingPic = response.body().string();
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
+                editor.putString("bing_pic", bingPic);
+                editor.apply();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Glide.with(MainActivity.this).load(bingPic).into(bingPicImg);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 }
