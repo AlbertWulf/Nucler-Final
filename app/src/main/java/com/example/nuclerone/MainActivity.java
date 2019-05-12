@@ -211,7 +211,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Method_choose = 1;
-                domain(Method_choose);
+                try {
+                    domain(Method_choose);
+                }
+                catch (Exception e1){
+                    Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
+
+                }
+
             }
         });
 
@@ -219,14 +226,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Method_choose = 0;
-                domain(Method_choose);
+                try{
+                    domain(Method_choose);
+                }
+                catch (Exception e2){
+                    Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
     }
 
 
-    public void domain(int Me_Choose){
+    public void domain(int Me_Choose) throws Exception{
         n.clear();//clear elements of n ,otherwise it will store the data of each print
         etStr = etrho.getText().toString();
         arrdata[0] = 0;
@@ -346,6 +358,12 @@ public class MainActivity extends AppCompatActivity {
         //intent.putExtra("key",arrdata);
         startActivity(intent);
     }
+    /**
+     *自定义MyMarkerView
+     */
+
+
+
     /**
      * 加载必应每日一图
      */
