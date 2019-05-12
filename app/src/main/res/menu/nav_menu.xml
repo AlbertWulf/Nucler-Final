@@ -32,7 +32,7 @@
 
             android:icon="@drawable/btn_plot"
 
-            android:title="PU239" />
+            android:title="Hanse Method" />
 
         <item
 
@@ -40,7 +40,7 @@
 
             android:icon="@drawable/btn_plot"
 
-            android:title="PU239" />
+            android:title="Taylor Method" />
 
     </group>
 

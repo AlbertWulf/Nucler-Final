@@ -6,8 +6,10 @@ import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+//import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,8 +19,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.bumptech.glide.Glide;
+import com.example.nuclerone.TaylorMethod.Taylor;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     public double p;//store the rho(t)
     private int len;
     private int size;
+    public int Method_choose = 0;
     private double l;
     public double maxcha;//max value of eigen value of F
     public Object result;
@@ -95,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
     public String P_9Blambda = "0.00002";
     //Pu239END
     private ImageView bingPicImg;
+    public SwipeRefreshLayout swipeRefresh;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +120,11 @@ public class MainActivity extends AppCompatActivity {
         }
         //(修)END
         setContentView(R.layout.activity_main);
-        Button btnplot = findViewById(R.id.btn_plot);
+        //Button btnplot = findViewById(R.id.btn_plot);
+        final FloatingActionsMenu f1_btn_menu =  findViewById(R.id.fab_menu);
+        final FloatingActionButton fl_btn_hansen = findViewById(R.id.fab_1);
+        final FloatingActionButton f1_btn_taylor =  findViewById(R.id.fab_2);
+
         etbeta = findViewById(R.id.et_beta);
         etrho = findViewById(R.id.et_rho);
         etlambda = findViewById(R.id.et_lambda);
@@ -120,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
         etbgtime = findViewById(R.id.et_bgtime);
         etstep = findViewById(R.id.et_step);
         etendtime = findViewById(R.id.et_endtime);
+        swipeRefresh = findViewById(R.id.swipe_refresh);
         //(BING)以下记载必应每日一图作为背景
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         bingPicImg = findViewById(R.id.bin_pic_img);
@@ -166,11 +179,13 @@ public class MainActivity extends AppCompatActivity {
                }
                 switch (item.getItemId()){
                     case R.id.nav_mail:
+                        Method_choose = 0;
                         mDrawerLayout.closeDrawers();
                         break;
                 }
                 switch (item.getItemId()){
                     case R.id.nav_task:{
+                        Method_choose = 1;
                         mDrawerLayout.closeDrawers();
                     }
                 }
@@ -179,182 +194,157 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //(侧）END
-
+        //(Swipe)以下处理下拉刷新更新必应图片背景的事件
+        //swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        swipeRefresh.setColorSchemeColors(getResources().getColor(R.color.colorAccent),getResources().getColor(R.color.colorPrimary),getResources().getColor(R.color.colorPrimary),getResources().getColor(R.color.colorAccent));
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadBingPic();
+            }
+        });
+        //(Swipe)END
        // final double[][] array = {{1.,2.,3},{4.,5.,6.},{7.,8.,10.}};
 
         //Matrix A = new Matrix(array);
-
-        btnplot.setOnClickListener(new View.OnClickListener() {
+        f1_btn_taylor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                n.clear();//clear elements of n ,otherwise it will store the data of each print
-                etStr = etrho.getText().toString();
-                arrdata[0] = 0;
-                //Double.parseDouble(etrho.getText().toString());
-               // arrdata[1] = Double.parseDouble(etbeta.getText().toString());
-                //arrdata[2] = Double.parseDouble(etlambda.getText().toString());
-                arrdata[3] = Double.parseDouble(etblambda.getText().toString());
-                arrdata[4] = Double.parseDouble(etbgtime.getText().toString());
-                arrdata[5] = Double.parseDouble(etstep.getText().toString());
-                arrdata[6] = Double.parseDouble(etendtime.getText().toString());
-                tempi = etbeta.getText().toString().split(",");
-                tempj = etlambda.getText().toString().split(",");
-                h = arrdata[5];//time step
-                l=  (arrdata[6]-arrdata[4])/arrdata[5];
-                len = (int) l;
-                beta = 0;
-                for(int i =0;i<6;i++) {
-                    betai[i] = Double.parseDouble(tempi[i]);
-                    lambdai[i] = Double.parseDouble(tempj[i]);
-                    beta = beta + betai[i];
-                }
-                y[0] = n0;//n0
-                for(int jj = 0;jj<6;jj++) {
-                    co[jj] = betai[jj]*n0/lambdai[jj]/arrdata[3];
-                    y[jj+1] = co[jj];
-                }
-
-                expr = etrho.getText().toString();
-                //for two lines below ,it's disturbing when users want to input sin or pi because java needs Math.sin and Math.PI,so
-                //replace here and you just need to input sin and pi
-                expr = expr.replaceAll("sin","Math.sin");
-                expr = expr.replaceAll("pi","Math.PI");
-                double mk = 0;//replace tt
-
-                //主循环
-                for(int tt = 0;tt<len;tt++) {
-                    mk = (double) tt;
-                    if(expr.indexOf("expr")==-1) {
-                        p = Double.parseDouble(expr);
-                    }
-                    else {
-                        engine.put("expr", mk/len*arrdata[6]);
-                        //engine.put("y", 10);
-                        try {
-                            result = engine.eval(expr);
-                            res = result.toString();
-                            p = Double.parseDouble(res);
-                            //if(tt == 100){
-                            //  Log.i("res",res);
-                            //Log.i("tt",String.valueOf(tt));
-                            //Log.i("p",String.valueOf(p));
-                            //Log.i("len",String.valueOf(len));
-                            //Log.i("mk",String.valueOf(mk));
-                            //Log.i("arr",String.valueOf(arrdata[6]));
-                            //Log.i("all",String.valueOf(mk/len*arrdata[6]));
-                            //}
-
-                        }
-                        catch (ScriptException e1)
-                        {}
-                    }
-//                    engine.put("expr", mk/len*arrdata[6]);
-//                    //engine.put("y", 10);
-//                    try {
-//                         result = engine.eval(expr);
-//                         res = result.toString();
-//                         p = Double.parseDouble(res);
-//                        //if(tt == 100){
-//                          //  Log.i("res",res);
-//                            //Log.i("tt",String.valueOf(tt));
-//                            //Log.i("p",String.valueOf(p));
-//                            //Log.i("len",String.valueOf(len));
-//                            //Log.i("mk",String.valueOf(mk));
-//                            //Log.i("arr",String.valueOf(arrdata[6]));
-//                            //Log.i("all",String.valueOf(mk/len*arrdata[6]));
-//                        //}
-//
-//                    }
-//                    catch (ScriptException e1)
-//                    {}
-                    //System.out.println(result);
-                    al = (beta-p)/arrdata[3];
-                    F[0][0] = (p-beta)/arrdata[3];
-
-                    //assign value of matrix F
-                    for (int ff = 1;ff<7;ff++) {
-                        F[0][ff] = lambdai[ff-1];
-                        F[ff][0] = betai[ff-1]/arrdata[3];
-                        F[ff][ff] = -lambdai[ff-1];
-                    }
-                    Matrix A = new Matrix(F);
-                    double[][] chara = A.eig().getD().getArray();
-                    double[] a = new double[7];//store the diagonal elements of chara(3X3)
-                    for(int aa = 0;aa<7;aa++) {
-                        a[aa] = chara[aa][aa];
-                    }
-                    Arrays.sort(a);
-                    maxcha = a[6];//max value of eigen value of Matrix F
-                    G[0][0] = Math.exp(-al*h);
-                    for(int ii=0;ii<6;ii++) {
-                        G[0][ii+1] = lambdai[ii]*(Math.exp(maxcha*h)-Math.exp(-al*h))/(maxcha+al);
-                        G[ii+1][0] = (Math.exp(maxcha*h)-Math.exp(-lambdai[ii]*h))/(maxcha+lambdai[ii])*betai[ii]/arrdata[3];
-                        G[ii+1][ii+1] = Math.exp(-lambdai[ii]*h);
-                    }
-                    Matrix gg = new Matrix(G);
-//                    if(tt == 100) {
-//                        for(int ff = 0;ff<7;ff++) {
-//                            Log.i("ch",String.valueOf(a[ff]));
-//                         //   Log.i("FF",String.valueOf(F[ff][fff]));
-//                        }
-//
-//                        Log.i("p",String.valueOf(p));
-//                        Log.i("p",String.valueOf(al));
-//                        Log.i("p",String.valueOf(h));
-//                        Log.i("beta",String.valueOf(beta));
-//                        Log.i("arr",String.valueOf(arrdata[3]));
-//
-//                        //Log.i("maxcha",String.valueOf(maxcha));
-//                       // Log.i("yg",String.valueOf(G[0][2]));
-//                        //for(int oo = 0;oo<7;oo++) {
-//                          //  for (int ll =0;ll<7;ll++) {
-//                                //Log.i("F",String.valueOf(F[oo][ll]));
-//                            //    Log.i("G"+oo+ll,String.valueOf(G[oo][ll]));
-//                            //}
-//                        //}
-//                    }
-
-                    Matrix yy = new Matrix(y,1);
-                    Matrix ynew  = gg.times(yy.transpose());
-                    yg = ynew.getArray();
-                    for(int sp = 0;sp<7;sp++) {
-                        y[sp] = yg[sp][0];
-                        //Log.i("sp",String.valueOf(sp));
-                        //Log.i("yg",String.valueOf(yg[sp][0]));
-
-                    }
-                    if(tt==100) {
-                        for(int oo = 0;oo<7;oo++) {
-                            Log.i("y"+oo,String.valueOf(y[oo]));
-                            Log.i("yg"+oo,String.valueOf(yg[oo][0]));
-                        }
-                    }
-                    n.add(y[0]);
-                }
-
-                size = n.size();    //动态数组a的长度
-                Double[] doubnt = (Double[])n.toArray(new Double[size]);//将动态数组a转换成Double数组
-                double[] db = new double[size];
-                for(int mm = 0;mm<size;mm++) {
-                    db[mm] = doubnt[mm].doubleValue();
-                }
-               // Log.i("HHD",String.valueOf(doubnt[2]));
-                //Log.i("HHD",String.valueOf(doubnt[3]));
-                //Log.i("Size",String.valueOf(size));
-                Intent intent = new Intent(MainActivity.this,Plot.class);
-                //b.putDoubleArray("nt",arrdata);
-                b.putDoubleArray("nn",db);
-                intent.putExtras(b);
-                intent.putExtra("len",size);
-                intent.putExtra("str_rho",etStr);
-                intent.putExtra("step",arrdata[5]);
-                //intent.putExtra("key",arrdata);
-                startActivity(intent);
-
-
+                Method_choose = 1;
+                domain(Method_choose);
             }
         });
 
+        fl_btn_hansen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Method_choose = 0;
+                domain(Method_choose);
+            }
+        });
+
+    }
+
+
+    public void domain(int Me_Choose){
+        n.clear();//clear elements of n ,otherwise it will store the data of each print
+        etStr = etrho.getText().toString();
+        arrdata[0] = 0;
+        //Double.parseDouble(etrho.getText().toString());
+        // arrdata[1] = Double.parseDouble(etbeta.getText().toString());
+        //arrdata[2] = Double.parseDouble(etlambda.getText().toString());
+        arrdata[3] = Double.parseDouble(etblambda.getText().toString());
+        arrdata[4] = Double.parseDouble(etbgtime.getText().toString());
+        arrdata[5] = Double.parseDouble(etstep.getText().toString());
+        arrdata[6] = Double.parseDouble(etendtime.getText().toString());
+        tempi = etbeta.getText().toString().split(",");
+        tempj = etlambda.getText().toString().split(",");
+        h = arrdata[5];//time step
+        l=  (arrdata[6]-arrdata[4])/arrdata[5];
+        len = (int) l;
+        beta = 0;
+        for(int i =0;i<6;i++) {
+            betai[i] = Double.parseDouble(tempi[i]);
+            lambdai[i] = Double.parseDouble(tempj[i]);
+            beta = beta + betai[i];
+        }
+        y[0] = n0;//n0
+        for(int jj = 0;jj<6;jj++) {
+            co[jj] = betai[jj]*n0/lambdai[jj]/arrdata[3];
+            y[jj+1] = co[jj];
+        }
+
+        expr = etrho.getText().toString();
+        //for two lines below ,it's disturbing when users want to input sin or pi because java needs Math.sin and Math.PI,so
+        //replace here and you just need to input sin and pi
+        expr = expr.replaceAll("sin","Math.sin");
+        expr = expr.replaceAll("pi","Math.PI");
+        double mk = 0;//replace tt
+
+        //主循环
+        for(int tt = 0;tt<len;tt++) {
+            mk = (double) tt;
+            if(expr.indexOf("expr")==-1) {
+                p = Double.parseDouble(expr);
+            }
+            else {
+                engine.put("expr", mk/len*arrdata[6]);
+                //engine.put("y", 10);
+                try {
+                    result = engine.eval(expr);
+                    res = result.toString();
+                    p = Double.parseDouble(res);
+
+                }
+                catch (ScriptException e1)
+                {}
+            }
+//
+            al = (beta-p)/arrdata[3];
+            F[0][0] = (p-beta)/arrdata[3];
+
+            //assign value of matrix F
+            for (int ff = 1;ff<7;ff++) {
+                F[0][ff] = lambdai[ff-1];
+                F[ff][0] = betai[ff-1]/arrdata[3];
+                F[ff][ff] = -lambdai[ff-1];
+            }
+            Matrix A = new Matrix(F);
+            double[][] chara = A.eig().getD().getArray();
+            double[] a = new double[7];//store the diagonal elements of chara(3X3)
+            for(int aa = 0;aa<7;aa++) {
+                a[aa] = chara[aa][aa];
+            }
+            Arrays.sort(a);
+            maxcha = a[6];//max value of eigen value of Matrix F
+            G[0][0] = Math.exp(-al*h);
+            for(int ii=0;ii<6;ii++) {
+                G[0][ii+1] = lambdai[ii]*(Math.exp(maxcha*h)-Math.exp(-al*h))/(maxcha+al);
+                G[ii+1][0] = (Math.exp(maxcha*h)-Math.exp(-lambdai[ii]*h))/(maxcha+lambdai[ii])*betai[ii]/arrdata[3];
+                G[ii+1][ii+1] = Math.exp(-lambdai[ii]*h);
+            }
+            Matrix gg = new Matrix(G);
+            Matrix yy = new Matrix(y,1);
+            Matrix ynew  = gg.times(yy.transpose());
+            yg = ynew.getArray();
+            for(int sp = 0;sp<7;sp++) {
+                y[sp] = yg[sp][0];
+            }
+            if(tt==100) {
+                for(int oo = 0;oo<7;oo++) {
+                    Log.i("y"+oo,String.valueOf(y[oo]));
+                    Log.i("yg"+oo,String.valueOf(yg[oo][0]));
+                }
+            }
+            n.add(y[0]);
+        }
+
+        size = n.size();    //动态数组a的长度
+        Double[] doubnt = (Double[])n.toArray(new Double[size]);//将动态数组a转换成Double数组
+        double[] db = new double[size];
+        for(int mm = 0;mm<size;mm++) {
+            db[mm] = doubnt[mm].doubleValue();
+        }
+        if(Method_choose == 1){
+            String y = expr.replaceAll("Math.sin","sin");
+            Taylor taylor = new Taylor(y,betai,lambdai,arrdata[3],arrdata[4],arrdata[6],arrdata[5]);
+            db = taylor.calN();
+
+        }
+
+
+        // Log.i("HHD",String.valueOf(doubnt[2]));
+        //Log.i("HHD",String.valueOf(doubnt[3]));
+        //Log.i("Size",String.valueOf(size));
+        Intent intent = new Intent(MainActivity.this,Plot.class);
+        //b.putDoubleArray("nt",arrdata);
+        b.putDoubleArray("nn",db);
+        intent.putExtras(b);
+        intent.putExtra("len",size);
+        intent.putExtra("str_rho",etStr);
+        intent.putExtra("step",arrdata[5]);
+        //intent.putExtra("key",arrdata);
+        startActivity(intent);
     }
     /**
      * 加载必应每日一图
@@ -381,6 +371,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         });
+        swipeRefresh.setRefreshing(false);
     }
 
 }

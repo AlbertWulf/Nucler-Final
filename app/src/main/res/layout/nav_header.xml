@@ -5,7 +5,7 @@
 
     android:layout_height="180dp"
 
-    android:background="?attr/colorPrimary"
+    android:background="@drawable/head_bg"
 
     android:padding="10dp">
 
@@ -21,7 +21,7 @@
 
         android:layout_centerInParent="true"
 
-        android:src="@drawable/btn_plot" />
+        android:src="@drawable/xbx_tx" />
 
 
 
@@ -35,9 +35,9 @@
 
         android:layout_alignParentBottom="true"
 
-        android:text="Tony Green"
+        android:text="Albert Wu"
 
-        android:textColor="#FFF"
+        android:textColor="#000"
 
         android:textSize="14sp" />
 
@@ -53,9 +53,9 @@
 
         android:layout_above="@id/username"
 
-        android:text="tonygreendev@gmail.com"
+        android:text="AlbertWulf.github.io"
 
-        android:textColor="#FFF"
+        android:textColor="#000"
 
         android:textSize="14sp" />
 
