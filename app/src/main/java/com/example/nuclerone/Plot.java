@@ -133,9 +133,9 @@ public class Plot extends AppCompatActivity {
         dataSet.setColor(Color.parseColor("#ff5500"));
         dataSet.setCircleColor(Color.parseColor("#ff5500"));
         dataSet.setLineWidth(1f);
-        //设置运行曲线平滑
-        dataSet.setCubicIntensity(0.6f);
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        //设置运行曲线平滑#禁用曲线平滑防止过拟合
+        //dataSet.setCubicIntensity(0.6f);
+        //dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         //
         XAxis xAxis = lineChart.getXAxis();
         YAxis leftyAxis = lineChart.getAxisLeft();
@@ -204,8 +204,9 @@ public class MyMarkerView extends MarkerView {
     public void refreshContent(Entry e, Highlight highlight) {
 
         //这里就设置你想显示到makerview上的数据，Entry可以得到X、Y轴坐标，也可以e.getData()获取其他你设置的数据
+        //Utils.formatNumber方法中的digitCount:用于显示在MarkView中的数字小数点后有效位数，但是小数点是逗号形式
 
-        tvContent.setText("t:" + Utils.formatNumber(e.getY(),0,true)+",n："+Utils.formatNumber(e.getY(), 0, true));
+        tvContent.setText("t:" + Utils.formatNumber(e.getX(),4,true)+",n："+Utils.formatNumber(e.getY(), 4, true));
 
         super.refreshContent(e, highlight);
 
