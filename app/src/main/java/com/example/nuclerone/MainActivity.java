@@ -1,5 +1,6 @@
 package com.example.nuclerone;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
@@ -25,6 +27,12 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.bumptech.glide.Glide;
 import com.example.nuclerone.TaylorMethod.Taylor;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.github.ybq.android.spinkit.sprite.Sprite;
+import com.github.ybq.android.spinkit.style.DoubleBounce;
+import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
+import com.nightonke.boommenu.BoomButtons.TextOutsideCircleButton;
+import com.nightonke.boommenu.BoomMenuButton;
+import com.sloop.view.loading.LeafLoading;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     public double dbgtime;
     public double h;//time step
     public double dendtime;
+    public double[] to_excel_N;
     public double[] arrdata = new double[7];
     public double[] y = new double[7];//y matirx
     public double[] co = new double[7];//Ci(t)
@@ -103,6 +112,12 @@ public class MainActivity extends AppCompatActivity {
     //Pu239END
     private ImageView bingPicImg;
     public SwipeRefreshLayout swipeRefresh;
+    public LeafLoading loading;
+    public ProgressDialog progressDialog;
+    public boolean isfinished;
+    public BoomMenuButton bmb;
+    public String[] boombutton_text = {"Hansen","Taylor","To Excel","Firefly","Firefly","Firefly","Firefly","Firefly","Firefly"};
+    public String[] boombutton_image = {"butterfly","butterfly"};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,7 +139,11 @@ public class MainActivity extends AppCompatActivity {
         final FloatingActionsMenu f1_btn_menu =  findViewById(R.id.fab_menu);
         final FloatingActionButton fl_btn_hansen = findViewById(R.id.fab_1);
         final FloatingActionButton f1_btn_taylor =  findViewById(R.id.fab_2);
+        //loading = (LeafLoading) findViewById(R.id.loading);
+        //设置进度
+        //loading.setProgress(50);
 
+        // loading.setVisibility(View.INVISIBLE);
         etbeta = findViewById(R.id.et_beta);
         etrho = findViewById(R.id.et_rho);
         etlambda = findViewById(R.id.et_lambda);
@@ -133,8 +152,62 @@ public class MainActivity extends AppCompatActivity {
         etstep = findViewById(R.id.et_step);
         etendtime = findViewById(R.id.et_endtime);
         swipeRefresh = findViewById(R.id.swipe_refresh);
+        //加载boomb
+        bmb = (BoomMenuButton) findViewById(R.id.bmb);
+        for (int i = 0; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
+            TextOutsideCircleButton.Builder builder = new TextOutsideCircleButton.Builder()
+                    .normalImageRes(R.drawable.butterfly)
+                    .normalText(boombutton_text[i]);
+            builder.listener(new OnBMClickListener() {
+                @Override
+                public void onBoomButtonClick(int index) {
+
+                    // When the boom-button corresponding this builder is clicked.
+                    //Toast.makeText(MainActivity.this, "Clicked " + index, Toast.LENGTH_SHORT).show();
+                    if(index == 0){
+                        Method_choose = 0;
+                        try{
+
+                            domain(Method_choose);
+                            //progressDialog.dismiss();
+                        }
+                        catch (Exception e2){
+                            Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    else if (index == 1){
+                        Method_choose = 1;
+                        try{
+
+                            domain(Method_choose);
+                            //progressDialog.dismiss();
+                        }
+                        catch (Exception e2){
+                            Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    else if(index == 2){
+                        Intent intent = new Intent(MainActivity.this,StorageExcel.class);
+                        intent.putExtra("To_excel",to_excel_N);
+                        intent.putExtra("bg_time",arrdata[4]);
+                        intent.putExtra("step",arrdata[5]);
+                        intent.putExtra("end_time",arrdata[6]);
+                        startActivity(intent);
+
+                    }
+                    else{
+                        Toast.makeText(MainActivity.this,"Nothing to do !",Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+            bmb.addBuilder(builder);
+
+        }
+
+        //
+
         //(BING)以下记载必应每日一图作为背景
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         bingPicImg = findViewById(R.id.bin_pic_img);
         String bingPic = prefs.getString("bing_pic",null);
         if (bingPic != null) {
@@ -212,7 +285,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Method_choose = 1;
                 try {
+
                     domain(Method_choose);
+
                 }
                 catch (Exception e1){
                     Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
@@ -227,7 +302,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Method_choose = 0;
                 try{
+
                     domain(Method_choose);
+                    //progressDialog.dismiss();
                 }
                 catch (Exception e2){
                     Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
@@ -239,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void domain(int Me_Choose) throws Exception{
+        isfinished = false;
         n.clear();//clear elements of n ,otherwise it will store the data of each print
         etStr = etrho.getText().toString();
         arrdata[0] = 0;
@@ -274,7 +352,12 @@ public class MainActivity extends AppCompatActivity {
         double mk = 0;//replace tt
 
         //主循环
+        //loading.setVisibility(View.VISIBLE);
         for(int tt = 0;tt<len;tt++) {
+          //  int progress = (int) Math.floor(tt*100/len);
+            //loading.setProgress(progress);
+            //Log.i("pro",String.valueOf(progress));
+
             mk = (double) tt;
             if(expr.indexOf("expr")==-1) {
                 p = Double.parseDouble(expr);
@@ -337,6 +420,7 @@ public class MainActivity extends AppCompatActivity {
         for(int mm = 0;mm<size;mm++) {
             db[mm] = doubnt[mm].doubleValue();
         }
+
         if(Method_choose == 1){
             String y = expr.replaceAll("Math.sin","sin");
             Taylor taylor = new Taylor(y,betai,lambdai,arrdata[3],arrdata[4],arrdata[6],arrdata[5]);
@@ -344,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-
+        to_excel_N = db;
         // Log.i("HHD",String.valueOf(doubnt[2]));
         //Log.i("HHD",String.valueOf(doubnt[3]));
         //Log.i("Size",String.valueOf(size));
@@ -355,8 +439,11 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("len",size);
         intent.putExtra("str_rho",etStr);
         intent.putExtra("step",arrdata[5]);
+
         //intent.putExtra("key",arrdata);
+        isfinished = true;
         startActivity(intent);
+        //loading.setVisibility(View.INVISIBLE);
     }
     /**
      *自定义MyMarkerView

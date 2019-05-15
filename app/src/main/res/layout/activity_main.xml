@@ -120,6 +120,14 @@
         android:singleLine="true"
         android:hint="End Time"
         />
+        <com.nightonke.boommenu.BoomMenuButton
+            android:id="@+id/bmb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:bmb_buttonEnum="textOutsideCircle"
+            app:bmb_piecePlaceEnum="piecePlace_dot_9_1"
+            app:bmb_buttonPlaceEnum="buttonPlace_sc_9_1"
+            />
         <com.getbase.floatingactionbutton.FloatingActionsMenu
 
             android:id="@+id/fab_menu"
@@ -127,11 +135,11 @@
             android:layout_width="wrap_content"
 
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="0dp"
 
             android:layout_marginRight="16dp"
 
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="0dp"
             fab:fab_expandDirection="down"
 
             fab:fab_addButtonColorNormal="@color/colorAccent"
@@ -177,6 +185,7 @@
                 fab:fab_title="Taylor Method"/>
 
         </com.getbase.floatingactionbutton.FloatingActionsMenu>
+
 
     </LinearLayout>
     </android.support.v4.widget.SwipeRefreshLayout>
