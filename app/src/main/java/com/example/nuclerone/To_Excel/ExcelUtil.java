@@ -2,7 +2,12 @@ package com.example.nuclerone.To_Excel;
 
 
 import android.content.Context;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
 import android.widget.Toast;
+
+import com.example.nuclerone.MainActivity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +16,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import es.dmoral.toasty.Toasty;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.Colour;
@@ -21,6 +27,8 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
+
+import static android.graphics.Typeface.BOLD_ITALIC;
 
 /**
  * @author dmrfcoder
@@ -161,7 +169,8 @@ public class ExcelUtil {
 
                 writebook.write();
                 workbook.close();
-                Toast.makeText(c, "导出Excel成功", Toast.LENGTH_SHORT).show();
+                Toasty.success(c, "导出 Excel 成功！", Toast.LENGTH_SHORT, true).show();
+                //Toast.makeText(c, "导出Excel成功", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

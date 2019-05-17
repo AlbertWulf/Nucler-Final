@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -13,6 +14,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,9 +48,12 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import Jama.Matrix;
+import es.dmoral.toasty.Toasty;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+
+import static android.graphics.Typeface.BOLD_ITALIC;
 
 public class MainActivity extends AppCompatActivity {
     private String etStr;
@@ -172,7 +179,21 @@ public class MainActivity extends AppCompatActivity {
                             //progressDialog.dismiss();
                         }
                         catch (Exception e2){
-                            Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
+                            Toasty.Config.getInstance()
+
+                                    .setTextColor(Color.GREEN)
+
+                                    .setToastTypeface(getAssets(), "PCap Terminal.otf")
+
+                                    .apply();
+
+                            Toasty.custom(MainActivity.this, "Invalid Input,Please Check!", getResources().getDrawable(R.drawable.laptop512),
+
+                                    Color.BLACK, Toast.LENGTH_SHORT, true, true).show();
+
+                            Toasty.Config.reset();
+                            //Toasty.error(MainActivity.this, "Error Input !", Toast.LENGTH_SHORT, true).show();
+                            //Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
                         }
                     }
                     else if (index == 1){
@@ -183,7 +204,24 @@ public class MainActivity extends AppCompatActivity {
                             //progressDialog.dismiss();
                         }
                         catch (Exception e2){
-                            Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
+                            Toasty.Config.getInstance()
+
+                                    .setTextColor(Color.GREEN)
+
+                                    .setToastTypeface(getAssets(), "PCap Terminal.otf")
+
+                                    .apply();
+
+                            Toasty.custom(MainActivity.this, "Invalid Input,Please Check!", getResources().getDrawable(R.drawable.laptop512),
+
+                                    Color.BLACK, Toast.LENGTH_SHORT, true, true).show();
+
+                            Toasty.Config.reset();
+
+
+
+                            //Toasty.error(MainActivity.this, "Error Input !", Toast.LENGTH_SHORT, true).show();
+                            //Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
                         }
                     }
                     else if(index == 2){
@@ -196,7 +234,21 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     else{
-                        Toast.makeText(MainActivity.this,"Nothing to do !",Toast.LENGTH_LONG).show();
+                        Toasty.Config.getInstance()
+
+                                .setTextColor(Color.GREEN)
+
+                                .setToastTypeface(getAssets(), "PCap Terminal.otf")
+
+                                .apply();
+
+                        Toasty.custom(MainActivity.this, "Nothing to do !", getResources().getDrawable(R.drawable.laptop512),
+
+                                Color.BLACK, Toast.LENGTH_SHORT, true, true).show();
+
+                        Toasty.Config.reset();
+                        //Toasty.info(MainActivity.this, "Nothing to do !", Toast.LENGTH_SHORT, true).show();
+                        //Toast.makeText(MainActivity.this,"Nothing to do !",Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -290,7 +342,21 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 catch (Exception e1){
-                    Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
+                    Toasty.Config.getInstance()
+
+                            .setTextColor(Color.GREEN)
+
+                            .setToastTypeface(getAssets(), "PCap Terminal.otf")
+
+                            .apply();
+
+                    Toasty.custom(MainActivity.this, "Invalid Input,Please Check!", getResources().getDrawable(R.drawable.laptop512),
+
+                            Color.BLACK, Toast.LENGTH_SHORT, true, true).show();
+
+                    Toasty.Config.reset();
+                    //Toasty.error(MainActivity.this, "Error Input !", Toast.LENGTH_SHORT, true).show();
+                    //Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
 
                 }
 
@@ -307,7 +373,21 @@ public class MainActivity extends AppCompatActivity {
                     //progressDialog.dismiss();
                 }
                 catch (Exception e2){
-                    Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
+                    Toasty.Config.getInstance()
+
+                            .setTextColor(Color.GREEN)
+
+                            .setToastTypeface(getAssets(), "PCap Terminal.otf")
+
+                            .apply();
+
+                    Toasty.custom(MainActivity.this, "Invalid Input,Please Check!", getResources().getDrawable(R.drawable.laptop512),
+
+                            Color.BLACK, Toast.LENGTH_SHORT, true, true).show();
+
+                    Toasty.Config.reset();
+                    //Toasty.error(MainActivity.this, "Error Input !", Toast.LENGTH_SHORT, true).show();
+                    //Toast.makeText(MainActivity.this,"Invalid Input,Please Check!",Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -449,7 +529,28 @@ public class MainActivity extends AppCompatActivity {
      *自定义MyMarkerView
      */
 
+    /**
+     * 定制Toast
+     */
+    private CharSequence getFormattedMessage() {
 
+        final String prefix = "Formatted ";
+
+        final String highlight = "bold italic";
+
+        final String suffix = " text";
+
+        SpannableStringBuilder ssb = new SpannableStringBuilder(prefix).append(highlight).append(suffix);
+
+        int prefixLen = prefix.length();
+
+        ssb.setSpan(new StyleSpan(BOLD_ITALIC),
+
+                prefixLen, prefixLen + highlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        return ssb;
+
+    }
 
     /**
      * 加载必应每日一图

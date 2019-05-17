@@ -18,6 +18,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +37,8 @@ import java.util.List;
 
 import com.example.nuclerone.To_Excel.ExcelUtil;
 import com.example.nuclerone.To_Excel.Neutron_Time;
+
+import static android.graphics.Typeface.BOLD_ITALIC;
 
 
 public class StorageExcel extends Activity implements View.OnClickListener {
@@ -211,6 +216,28 @@ public class StorageExcel extends Activity implements View.OnClickListener {
         ExcelUtil.writeObjListToExcel(excelNeutron_TimeList, filePath, context);
 
         textView.setText("excel已导出至：" + filePath);
+
+    }
+    /**
+     * 定制Toast
+     */
+    private CharSequence getFormattedMessage() {
+
+        final String prefix = "Formatted ";
+
+        final String highlight = "bold italic";
+
+        final String suffix = " text";
+
+        SpannableStringBuilder ssb = new SpannableStringBuilder(prefix).append(highlight).append(suffix);
+
+        int prefixLen = prefix.length();
+
+        ssb.setSpan(new StyleSpan(BOLD_ITALIC),
+
+                prefixLen, prefixLen + highlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        return ssb;
 
     }
 }
