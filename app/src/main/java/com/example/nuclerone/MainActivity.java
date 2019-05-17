@@ -48,6 +48,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import Jama.Matrix;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import es.dmoral.toasty.Toasty;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     public double n0 = 1;
     public double al;//alpha
     public double p;//store the rho(t)
+    public double T;//记录反应堆周期，其实等于maxcha
     private int len;
     private int size;
     public int Method_choose = 0;
@@ -123,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
     public ProgressDialog progressDialog;
     public boolean isfinished;
     public BoomMenuButton bmb;
-    public String[] boombutton_text = {"Hansen","Taylor","To Excel","Firefly","Firefly","Firefly","Firefly","Firefly","Firefly"};
+    public String[] boombutton_text = {"Hansen","Taylor","To Excel","Calculate T","Firefly","Firefly","Firefly","Firefly","Firefly"};
     public String[] boombutton_image = {"butterfly","butterfly"};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,6 +233,22 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("step",arrdata[5]);
                         intent.putExtra("end_time",arrdata[6]);
                         startActivity(intent);
+
+                    }
+                    else if(index == 3){
+                        if(IsT(etrho.getText().toString())){
+                             new SweetAlertDialog(MainActivity.this)
+                                     .setTitleText("反应堆周期")
+                                     .setContentText(String.valueOf(maxcha))
+                                     .show();
+                        }
+                        else {
+                            new SweetAlertDialog(MainActivity.this)
+                                    .setTitleText("无周期")
+                                    .setContentText("此情况下无法计算周期")
+                                    .show();
+
+                        }
 
                     }
                     else{
@@ -526,9 +544,11 @@ public class MainActivity extends AppCompatActivity {
         //loading.setVisibility(View.INVISIBLE);
     }
     /**
-     *自定义MyMarkerView
+     *判断是否满足计算周期条件：rho为正常数
      */
-
+    private boolean IsT(String Srho){
+        return Srho.matches("^\\d+(\\.\\d+)?");
+    }
     /**
      * 定制Toast
      */
