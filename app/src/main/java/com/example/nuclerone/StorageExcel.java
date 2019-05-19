@@ -24,6 +24,7 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,16 +38,21 @@ import java.util.List;
 
 import com.example.nuclerone.To_Excel.ExcelUtil;
 import com.example.nuclerone.To_Excel.Neutron_Time;
+import com.sackcentury.shinebuttonlib.ShineButton;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 import static android.graphics.Typeface.BOLD_ITALIC;
 
 
 public class StorageExcel extends Activity implements View.OnClickListener {
 
+    private ShineButton btn_shine_export;
+    private ShineButton btn_shine_open;
     private Button exportButton;
     private Button openButton;
     private TextView textView;
-
+    private EditText et_file_name;
     private AlertDialog alertDialog;
     private AlertDialog mDialog;
     public double[] get_excel_N;
@@ -54,6 +60,7 @@ public class StorageExcel extends Activity implements View.OnClickListener {
     public double step;
     public double end_time;
 
+    public String file_name;
     String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
 
@@ -99,12 +106,18 @@ public class StorageExcel extends Activity implements View.OnClickListener {
         //Log.i("bg",String.valueOf(bg_time));
         //Log.i("step",String.valueOf(step));
         //Log.i("end_time",String.valueOf(end_time));
+        et_file_name = findViewById(R.id.et_filename);
         exportButton = findViewById(R.id.export_button);
         exportButton.setOnClickListener(StorageExcel.this);
 
         openButton = findViewById(R.id.open_button);
+
         openButton.setOnClickListener(StorageExcel.this);
         textView = findViewById(R.id.textView);
+        btn_shine_export = findViewById(R.id.btn_shine_export);
+        btn_shine_open = findViewById(R.id.btn_shine_open);
+        btn_shine_export.setOnClickListener(StorageExcel.this);
+        btn_shine_open.setOnClickListener(StorageExcel.this);
 
 
     }
@@ -155,6 +168,13 @@ public class StorageExcel extends Activity implements View.OnClickListener {
                 exportExcel(this);
 
                 break;
+
+            case R.id.btn_shine_export:
+                exportExcel(this);
+                break;
+            case R.id.btn_shine_open:
+                openDir();
+                break;
             case R.id.open_button:
                 openDir();
             default:
@@ -184,9 +204,17 @@ public class StorageExcel extends Activity implements View.OnClickListener {
         if (!file.exists()) {
             file.mkdirs();
         }
+        String excelFileName;
+        file_name = et_file_name.getText().toString();
+        if(null == file_name || "".equals(file_name)) {
+            new SweetAlertDialog(context)
+                    .setTitleText("文件名缺失")
+                    .setContentText("设置为默认neutron")
+                    .show();
+            file_name = "neutron";
+        }
 
-
-        String excelFileName = "/neutron.xls";
+        excelFileName = "/" + file_name + ".xls";
 
 
         String[] title = {"Time", "Neutron"};
@@ -214,8 +242,11 @@ public class StorageExcel extends Activity implements View.OnClickListener {
 
 
         ExcelUtil.writeObjListToExcel(excelNeutron_TimeList, filePath, context);
-
-        textView.setText("excel已导出至：" + filePath);
+        new SweetAlertDialog(context)
+                .setTitleText("导出成功")
+                .setContentText("excel已导出至：" + filePath)
+                .show();
+        //textView.setText("excel已导出至：" + filePath);
 
     }
     /**
