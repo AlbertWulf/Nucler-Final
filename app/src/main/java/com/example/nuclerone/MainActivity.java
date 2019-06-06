@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
     public ProgressDialog progressDialog;
     public boolean isfinished;
     public BoomMenuButton bmb;
-    public String[] boombutton_text = {"Hansen","Taylor","To Excel","Calculate T","Firefly","Firefly","Firefly","Firefly","Firefly"};
+    public String[] boombutton_text = {"Hansen","Taylor","To Excel","Calculate T","Calculate rho","Firefly","Firefly","Firefly","Firefly"};
     public String[] boombutton_image = {"butterfly","butterfly"};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
                         if(IsT(etrho.getText().toString())){
                              new SweetAlertDialog(MainActivity.this)
                                      .setTitleText("反应堆周期")
-                                     .setContentText(String.valueOf(maxcha))
+                                     .setContentText(String.valueOf(2*Math.PI/maxcha))
                                      .show();
                         }
                         else {
@@ -249,6 +249,12 @@ public class MainActivity extends AppCompatActivity {
                                     .show();
 
                         }
+
+                    }
+                    else if(index == 4){
+                        Intent intent = new Intent(MainActivity.this,CalculateRho.class);
+
+                        startActivity(intent);
 
                     }
                     else{
