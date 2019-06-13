@@ -33,7 +33,7 @@ public class F1 {
 			 return Taylor.sin_a*Math.sin(Taylor.sin_b*x)/Taylor.l;
 		 }
 			 else if(Taylor.k==-1) {
-				 return Taylor.A*x;
+				 return Taylor.A*x/Taylor.l;
 			 }
 			 else {return Taylor.rho/Taylor.l;}
 	 }
