@@ -129,9 +129,9 @@ public class Plot extends AppCompatActivity {
 
 
 
-        LineDataSet dataSet = new LineDataSet(yDataList,"Netron Flux");
-        dataSet.setColor(Color.parseColor("#ff5500"));
-        dataSet.setCircleColor(Color.parseColor("#ff5500"));
+        LineDataSet dataSet = new LineDataSet(yDataList,"Neutron Flux");
+        dataSet.setColor(Color.parseColor("#00FFB4"));
+        dataSet.setCircleColor(Color.parseColor("#F6748F"));
         dataSet.setLineWidth(1f);
         //设置运行曲线平滑#禁用曲线平滑防止过拟合
         //dataSet.setCubicIntensity(0.6f);

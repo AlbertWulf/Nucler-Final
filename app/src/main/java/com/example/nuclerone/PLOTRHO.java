@@ -137,8 +137,8 @@ public class PLOTRHO extends AppCompatActivity {
 
 
 
-        LineDataSet dataSet = new LineDataSet(yDataList,"Netron Flux");
-        dataSet.setColor(Color.parseColor("#ff5500"));
+        LineDataSet dataSet = new LineDataSet(yDataList,"Rho~T");
+        dataSet.setColor(Color.parseColor("#26C5FF"));
         dataSet.setCircleColor(Color.parseColor("#ff5500"));
         dataSet.setLineWidth(1f);
         //设置运行曲线平滑#禁用曲线平滑防止过拟合
